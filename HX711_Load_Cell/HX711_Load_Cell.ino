@@ -9,8 +9,8 @@ const int LOADCELL_SCK_PIN = 6;
 
 HX711 scale;
 
-int highest_num = 0;
-int curr_num = 0;
+double highest_num = 0;
+double curr_num = 0;
 bool f_record = false;
 byte btn;
 
@@ -24,8 +24,10 @@ void setup() {
     Serial.println("HX711 Setup");
     scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
 
-    scale.set_scale(100469); 
+    scale.set_offset(19648);
+    scale.set_scale(219.754669);
     scale.tare();
+    scale.set_average_mode();
 }
 
 void loop() {
@@ -42,9 +44,13 @@ void doButton() {
 
 void doScale() {
     Serial.print("Weight: ");
-    Serial.println(scale.get_units());
+    Serial.print(scale.get_units());
+    Serial.print(" grams or ");
 
     curr_num = scale.get_units();
+    curr_num = curr_num / 453.6;
+    Serial.print(curr_num);
+    Serial.println(" pounds");
 }
 
 void doLogic() {
@@ -80,8 +86,8 @@ void doLogic() {
         }
         Serial.print("Highest Weight: ");
         Serial.println(scale.get_units());
-        MFS.write(highest_num);
+        MFS.write(highest_num, 2);
     } else {
-        MFS.write(curr_num);
+        MFS.write(curr_num, 2);
     }
 }
